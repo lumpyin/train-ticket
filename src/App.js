@@ -1,8 +1,11 @@
 import React ,{useState,useMemo,useRef,useCallback,memo, PureComponent, useEffect}from 'react';
 import './App.css';
 import {createAdd,createRemove,createToggle,createSet} from './action';
+import reducer from './reducers';
 
 let idSeq = Date.now();
+
+
 
 function bindActionCreators(actionCreators,dispatch){
    const ret = {};
@@ -107,6 +110,7 @@ const LS_KEY = '_$-todos_';
 function TodoList(){
 
   const [todos,setTodos] = useState([]);
+  const [incrementCount,setIncrementCount] = useState(0);
 
   const addTodo = useCallback((todo)=> {
     setTodos(todos => [...todos,todo])
@@ -124,28 +128,26 @@ function TodoList(){
     }))
   },[]);
 
+  
+
   const dispatch = useCallback( (action) => {
-    const {type,payload} = action;
-    switch(type){
-      case 'set':
-          setTodos(payload);
-          break;
-      case 'add':
-          setTodos(todos => [...todos,payload]);
-          break;
-      case 'remove':
-          setTodos(todos => todos.filter(todo => {
-            return todo.id !== payload;
-          }))
-          break;
-      case 'toggle':
-          setTodos(todos => todos.map(todo => {
-            return todo.id === payload ? {...todo,complete:!todo.complete}:todo; 
-          }))
-          break;
-      default:
-    }
-  },[]);
+     const state = {
+       todos,
+       incrementCount,
+     };
+
+     const setter = {
+       todos:setTodos,
+       incrementCount:setIncrementCount
+     };
+
+     const newState = reducer(state,action);
+
+     for(let key in newState){
+      setter[key](newState[key]);
+     }
+
+  },[todos,incrementCount]);
 
   useEffect(()=> {
     const todos = JSON.parse(localStorage.getItem(LS_KEY) || '[]');

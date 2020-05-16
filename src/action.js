@@ -6,10 +6,10 @@ export function createSet(payload){
 }
 
 export function createAdd(payload){
-    return {
-        type:'add',
-        payload,
-    };
+    return (dispatch,state)=>{
+        const {todos} = state;
+        
+    }
 }
 
 export function createRemove(payload){
